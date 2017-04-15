@@ -72,7 +72,6 @@ class ShearLagElem(object):
         """
         q = self.q
         me = self.me
-        b = self.b
         A = self.A
         E = self.E
         G = self.G
@@ -225,7 +224,6 @@ class ShearLagElem(object):
         Returns:
             Ouput (TYPE): Description
         """
-        b = self.b
         A = self.A
         E = self.E
         G = self.G
