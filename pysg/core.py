@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*
+# -*- coding: utf-8 -*-
+# @Author: JohnnySG
+# @Date:   2017-04-15 14:55:59
+# @Email:  sg19910914@gmail.com
+# @Last Modified by:   JohnnySG
+# @Last Modified time: 2017-04-18 20:39:39
+# ----------------------------------------
 
 import numpy as np
 

@@ -3,24 +3,36 @@
 # @Author: Johnny
 # @Date:   2016-07-12 11:40:10
 # @Email:  sg19910914@gmail.com
-# @Last Modified by:   Johnny
-# @Last Modified time: 2016-07-26 10:21:30
+# @Last Modified by:   JohnnySG
+# @Last Modified time: 2017-04-18 20:31:56
 # ----------------------------------------
 
 
-class Section:
-    def __init__(self, mat, A, J, I33, I22):
-        """Summary
+class Section(object):
+    def __init__(self, A, I, Aw, Sw, Iw, Iww):
+        """Define the cross-section properties
 
         Args:
-            mat (TYPE): Description
             A (TYPE): Area
-            J (TYPE): Description
-            I33 (TYPE): Description
-            I22 (TYPE): Description
+            I (TYPE): Description
+            Aw (TYPE): Description
+            Sw (TYPE): Description
+            Iw (TYPE): Description
+            Iww (TYPE): Description
         """
-        self.material = mat
         self.A = A
-        self.J = J
-        self.I33 = I33
-        self.I22 = I22
+        self.I = I
+        self.Aw = Aw
+        self.Sw = Sw
+        self.Iw = Iw
+        self.Iww = Iww
+
+if __name__ == '__main__':
+    A = 10.3
+    I = 6.0285
+    Aw = 0.247913
+    Sw = -1.28276
+    Iw = 1.00748
+    Iww = 0.796819
+    sec = Section(A, I, Aw, Sw, Iw, Iww)
+    print(sec.Iww)

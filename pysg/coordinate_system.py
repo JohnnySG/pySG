@@ -1,15 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: Johnny
-# @Date:   2016-07-12 11:40:10
+# @Author: JohnnySG
+# @Date:   2017-04-15 18:08:06
 # @Email:  sg19910914@gmail.com
-# @Last Modified by:   Johnny
-# @Last Modified time: 2016-07-26 10:19:35
+# @Last Modified by:   JohnnySG
+# @Last Modified time: 2017-04-16 15:54:34
 # ----------------------------------------
 import numpy as np
 
 
-class CoordinateSystem:
+class CoordinateSystem(object):
+    """Summary
+
+    Attributes:
+        origin (TYPE): Description
+        x (TYPE): Description
+        y (TYPE): Description
+        z (TYPE): Description
+    """
+
     def __init__(self, origin, pt1, pt2):
         """
         Args:
@@ -20,6 +29,7 @@ class CoordinateSystem:
         Raises:
             Exception: Description
         """
+        super().__init__()
         self.origin = origin
         vec1 = np.array([pt1[0] - origin[0], pt1[1] -
                          origin[1], pt1[2] - origin[2]])
@@ -66,11 +76,21 @@ class CoordinateSystem:
         self.origin = (x, y, z)
 
     def AlignWithGlobal(self):
+        """Summary
+
+        Returns:
+            Ouput (TYPE): Description
+        """
         self.x = np.array([1, 0, 0])
         self.y = np.array([0, 1, 0])
         self.z = np.array([0, 0, 1])
 
     def TransformMatrix(self):
+        """Summary
+
+        Returns:
+            Ouput (TYPE): Description
+        """
         x = self.x
         y = self.y
         z = self.z
@@ -79,5 +99,9 @@ class CoordinateSystem:
                       [x[2], y[2], z[2]]])
         return V.transpose()
 
-csys = CoordinateSystem((0, 0, 0), (1, 1, 0), (0, 1, 0))
+csys = CoordinateSystem((0, 0, 0), (1, 1, 0), (-100, 5000, 0))
+print(csys.x)
+print(csys.y)
+print(csys.z)
 csys.AlignWithGlobal()
+print(csys.AlignWithGlobal())
