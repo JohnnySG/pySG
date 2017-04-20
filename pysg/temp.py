@@ -2,17 +2,18 @@
 # -*- coding: utf-8 -*
 
 import numpy as np
-import scipy.sparse as scsparse
-from matplotlib import pyplot as plt
 from numpy import poly1d
 from scipy.sparse.linalg import spsolve
-import iopro
+from scipy.interpolate import spline
+import scipy.sparse as scsparse
+from matplotlib import pyplot as plt
+import pandas as pd
 
-import model
-import elemment
 import core
 import material
 import section
+import model
+import element
 
 # 材料特性
 E = 3.55 * 10**7
@@ -28,75 +29,65 @@ Iw = 1.00748
 Iww = 0.796819
 Aw = 0.247913
 
-# Node Coordinates
-adapter = iopro.text_adapter('NodeTable.csv', parser='csv')
-adapter.set_field_types({"x": 'f8', "z": 'f8'})
-node = adapter[["x", "z"]][:]
-node = node.view('f8').reshape(node.shape + (-1,))
-
-# Element Connectivity
-adapter = iopro.text_adapter('ElementTable.csv', parser='csv')
-element = adapter[["i", "j"]][:]
-element = element.view('i8').reshape(element.shape + (-1,))
-
-# Constraint Settings
-adapter = iopro.text_adapter('ConstraintTable.csv', parser='csv')
-constraint = adapter[:]
-constraint = constraint.view('i8').reshape(constraint.shape + (-1,))
-
-# Nodal Forces
-adapter = iopro.text_adapter('LoadTable.csv', parser='csv')
-nLoad = adapter[["Force 1"]][:]
-# nLoad = nLoad.view('i8').reshape(nLoad.shape + (-1,))
-# print(adapter.get_field_names())
-# print(element)
+# 读取模型文件
+xlsx = pd.ExcelFile('Data.xlsx')
+nod = xlsx.parse('Node', index_col=0)
+ele = xlsx.parse('Element', index_col=0)
+cons = xlsx.parse('Constraint', index_col=0)
+nLoad = xlsx.parse('nLoad', index_col=0)
+eLoad = xlsx.parse('eLoad', index_col=0)
 
 # 定义材料特性与截面几何特性
 mat = material.Material(E, mu, gamma, alpha)
 sec = section.Section(A, I, Aw, Sw, Iw, Iww)
-cons = constraint
 
-beam = elemment.ShearLag(mat, sec, node, element)
-# Kg, Ig, Jg = beam.stiffness()
+# 计算局部坐标系下的单元刚度矩阵
+beam = element.ShearLag(mat, sec, nod, ele)
 Ke = beam.stiffness()
 
-print(beam.Ke[0])
-# KK = model.assembling(Ig, Jg, Kg)
+# # 计算自由度和单元定位向量
+DOF = core.getDOF(cons, nod.shape[0])
+LOC = core.getLOC(DOF, ele)
 
-# NLoad = beam.nodeLoad(nLoad)
-# # DLoad, ii, jj = beam.distrLoad1(dLoad)
-# DLoad, ii, jj = beam.distrLoad(q0=0, qu=0, qv=450)
-# DLoad = model.assembling(ii, jj, DLoad)
-# Load = DLoad + NLoad
+# 计算整体坐标系下的单元刚度矩阵
+stru = model.Model(beam, LOC)
+Kmat = stru.assemble()
 
-# # plt.spy(KK)
-# # plt.show()
+# 计算综合节点荷载列阵
+load = stru.load(nLoad, eLoad)
 
-# pltDOF = beam.DOF[:, 1]
-# pltX = q[pltDOF != 0, 0]
-# pltDOF = pltDOF[pltDOF != 0] - 1
-
-# print(beam.DOF)
-# print(beam.LOC)
-
-# disp = spsolve(KK, Load)
-# # print(pltX)
-# # print(disp[pltDOF])
-# # plt.plot(pltX, disp[pltDOF], "o")
-# # plt.show()
-
-# De = np.array(beam.LOC, dtype=np.float64)
-# De = De.reshape((40, 8, 1))
-# DeView = De.ravel()
-# valu, indices = np.unique(DeView, return_inverse=True)
-# valu[1:] = disp
-# DeView[:] = valu[indices]
-
-# zzz = beam.Ke @ De - beam.Ke @ beam.bDe + beam.bFe
-# # print(zzz[:, 2, 0])
-# # print(zzz[:, 6, 0])
+# 求解平衡方程, 获得位移解
+nD = spsolve(Kmat, load)
+nD_Mat = np.zeros_like(DOF, dtype="f8")
+nD_Mat[DOF != 0] = nD
+displacement = nD_Mat[:, 0]
+# print(displacement)
 
 
-# # if __name__ == "__main__":
-# #     import cProfile
-# #     cProfile.run("foo()")
+# 计算单元杆端力
+eD = core.getLOC(nD_Mat, ele).reshape((ele.shape[0], 8, 1))
+Fe = beam.Ke @ eD - stru.dFe
+nn = 2
+force = (np.r_[Fe[:, nn, 0], 0] - np.r_[0, Fe[:, nn + 4, 0]]) / 2
+force[0] = Fe[0, nn, 0]
+force[-1] = -Fe[-1, nn + 4, 0]
+# print(force)
+n2 = 3
+force2 = (np.r_[Fe[:, n2, 0], 0] - np.r_[0, Fe[:, n2 + 4, 0]]) / 2
+force2[0] = Fe[0, n2, 0]
+force2[-1] = -Fe[-1, n2 + 4, 0]
+
+# 绘制位移图、内力图
+pltX = nod.iloc[:, 0].values
+x_smooth = np.linspace(0, pltX[-1], 200)
+y_smooth = spline(pltX, displacement, x_smooth)
+y_smooth2 = spline(pltX, force2, x_smooth)
+
+plt.plot(x_smooth, y_smooth, '-.')
+# plt.plot(x_smooth, y_smooth2, '-')
+plt.show()
+
+
+if __name__ == "__main__":
+
+    pass

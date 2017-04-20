@@ -4,10 +4,11 @@
 # @Date:   2017-04-15 18:01:33
 # @Email:  sg19910914@gmail.com
 # @Last Modified by:   JohnnySG
-# @Last Modified time: 2017-04-15 18:03:24
+# @Last Modified time: 2017-04-18 21:54:11
 # ----------------------------------------
 import numpy as np
-import CoordinateSystem
+import coordinate_system
+import iopro
 
 
 class Node(object):
@@ -25,7 +26,7 @@ class Node(object):
         o = [x, y, z]
         pt1 = [x + 1, y, z]
         pt2 = [x, y + 1, z]
-        self.localCsys = CoordinateSystem.CoordinateSystem(o, pt1, pt2)
+        self.localCsys = coordinate_system.CoordinateSystem(o, pt1, pt2)
         self.restraints = [False] * 6
         self.load = [False] * 6
         self.disp = [False] * 6
@@ -75,3 +76,8 @@ class Node(object):
             res (TYPE): Description
         """
         self.restraints = res
+
+
+if __name__ == '__main__':
+    node = Node(1, 1, 1)
+    print(node.TransformMatrix())

@@ -4,7 +4,7 @@
 # @Date:   2017-04-15 18:08:06
 # @Email:  sg19910914@gmail.com
 # @Last Modified by:   JohnnySG
-# @Last Modified time: 2017-04-16 15:54:34
+# @Last Modified time: 2017-04-18 21:07:44
 # ----------------------------------------
 import numpy as np
 
@@ -99,9 +99,11 @@ class CoordinateSystem(object):
                       [x[2], y[2], z[2]]])
         return V.transpose()
 
-csys = CoordinateSystem((0, 0, 0), (1, 1, 0), (-100, 5000, 0))
-print(csys.x)
-print(csys.y)
-print(csys.z)
-csys.AlignWithGlobal()
-print(csys.AlignWithGlobal())
+if __name__ == '__main__':
+
+    csys = CoordinateSystem((0, 0, 0), (1, 1, 0), (-100, 5000, 0))
+    print(csys.x)
+    print(csys.y)
+    print(csys.z)
+    csys.AlignWithGlobal()
+    print(csys.AlignWithGlobal())
