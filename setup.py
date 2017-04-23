@@ -3,15 +3,15 @@
 # @Author: Johnny
 # @Date:   2016-05-21 14:36:50
 # @Email:  sg19910914@gmail.com
-# @Last Modified by:   Johnny
-# @Last Modified time: 2016-08-01 12:46:52
+# @Last Modified by:   JohnnySG
+# @Last Modified time: 2017-04-20 15:35:18
 # ----------------------------------------
 
 from setuptools import setup
 
 
 def readme():
-    with open('README.rst') as f:
+    with open('README.md') as f:
         return f.read()
 
 

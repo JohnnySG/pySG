@@ -4,10 +4,11 @@
 # @Date:   2017-04-15 14:55:45
 # @Email:  sg19910914@gmail.com
 # @Last Modified by:   JohnnySG
-# @Last Modified time: 2017-04-19 19:31:24
+# @Last Modified time: 2017-04-22 23:43:09
 # ----------------------------------------
 
 import numpy as np
+import pandas as pd
 
 
 class ShearLag(object):
@@ -19,7 +20,7 @@ class ShearLag(object):
     proposed.
     """
 
-    def __init__(self, mat, sec, node, element):
+    def __init__(self, mat, sec, nod_tab, ele_tab):
         """Inits ShearLagElement with database.
 
         Args:
@@ -28,19 +29,20 @@ class ShearLag(object):
         super().__init__()
         self.mat = mat
         self.sec = sec
-        self.node = node
-        self.element = element
+        self.nod_tab = nod_tab
+        self.ele_tab = ele_tab
 
-        q1 = node.loc[element.iloc[:, 0]]
-        q2 = node.loc[element.iloc[:, 1]]
+        q1 = nod_tab[ele_tab[[0]]]
+        q2 = nod_tab[ele_tab[[1]]]
         self.L = np.sqrt(np.sum((q2.values - q1.values)**2, axis=1))
         delta = q2.values - q1.values
         self.C = delta[:, 0] / self.L
         self.S = -delta[:, 2] / self.L
 
-    def ele_trans_matrix(self):
+    @property
+    def trans(self):
 
-        trans = np.zeros((self.element.shape[0], 8, 8))
+        trans = np.zeros((self.ele_tab.shape[0], 8, 8))
         trans[:, 0, 0] = trans[:, 1, 1] = trans[:, 4, 4] = trans[:, 5, 5] = (
             self.C
         )
@@ -66,7 +68,7 @@ class ShearLag(object):
         Iww = self.sec.Iww
         L = self.L
 
-        Ke = np.zeros((self.element.shape[0], 8, 8))
+        Ke = np.zeros((self.ele_tab.shape[0], 8, 8))
         Ke[:, 0, 0] = Ke[:, 4, 4] = E * A / L
         Ke[:, 0, 4] = Ke[:, 4, 0] = -E * A / L
         Ke[:, 3, 0] = Ke[:, 0, 3] = Ke[:, 4, 7] = Ke[:, 7, 4] = E * Sw / L
@@ -92,3 +94,31 @@ class ShearLag(object):
         self.Ke = Ke
 
         return self.Ke
+
+    def setLoad(self, load):
+        """load: a number vector indicates a nodal load.
+
+        Args:
+            load (TYPE): Description
+        """
+        self.load = load.loc[self.ele_tab.index]
+
+    @property
+    def equLoad(self):
+
+        L = self.L
+        load = self.load
+        qu0 = load.iloc[:, 0]
+        qu = (load.iloc[:, 1] - load.iloc[:, 0]) / L
+        qv0 = load.iloc[:, 2]
+        qv = (load.iloc[:, 3] - load.iloc[:, 2]) / L
+
+        equLoad = np.zeros((self.ele_tab.shape[0], 8, 1))
+        equLoad[:, 0, 0] = qu * L**2 / 6 + qu0 * L / 2
+        equLoad[:, 1, 0] = 3 * qv * L**2 / 20 + qv0 * L / 2
+        equLoad[:, 2, 0] = -qv * L**3 / 30 - qv0 * L**2 / 12
+        equLoad[:, 4, 0] = qu * L**2 / 3 + qu0 * L / 2
+        equLoad[:, 5, 0] = 7 * qv * L**2 / 20 + qv0 * L / 2
+        equLoad[:, 6, 0] = qv * L**3 / 20 + qv0 * L**2 / 12
+
+        return equLoad

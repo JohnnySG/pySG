@@ -4,15 +4,14 @@
 # @Date:   2017-04-15 18:01:33
 # @Email:  sg19910914@gmail.com
 # @Last Modified by:   JohnnySG
-# @Last Modified time: 2017-04-18 21:54:11
+# @Last Modified time: 2017-04-22 23:01:21
 # ----------------------------------------
 import numpy as np
-import coordinate_system
-import iopro
+import pandas as pd
 
 
 class Node(object):
-    def __init__(self, x, y, z):
+    def __init__(self, node_tab):
         """Summary
 
         Args:
@@ -20,35 +19,10 @@ class Node(object):
             y (float): y-coordinate of Node
             z (float): z-coordinate of Node
         """
-        self.x = x
-        self.y = y
-        self.z = z
-        o = [x, y, z]
-        pt1 = [x + 1, y, z]
-        pt2 = [x, y + 1, z]
-        self.localCsys = coordinate_system.CoordinateSystem(o, pt1, pt2)
-        self.restraints = [False] * 6
-        self.load = [False] * 6
-        self.disp = [False] * 6
-
-    def TransformMatrix(self):
-        """Summary
-
-        Returns:
-            Ouput (TYPE): Description
-        """
-        V = self.localCsys.TransformMatrix()
-        V_ = np.zeros((6, 6))
-        V_[:3, :3] = V_[3:, 3:] = V
-        return V_
-
-    def InitializeCsys(self):
-        """Summary
-
-        Returns:
-            Ouput (TYPE): Description
-        """
-        self.localCsys.AlignWithGlobal()
+        self.coord = node_tab
+        self.x = node_tab[[0]]
+        self.y = node_tab[[1]]
+        self.z = node_tab[[2]]
 
     def setLoad(self, load):
         """
@@ -79,5 +53,5 @@ class Node(object):
 
 
 if __name__ == '__main__':
-    node = Node(1, 1, 1)
-    print(node.TransformMatrix())
+
+    pass

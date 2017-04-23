@@ -9,7 +9,7 @@
 /*.egg
 
 # Back files
-/pysgBAK/
+/pysgBAK*/
 
 # Git CMD files
 GitCMD.bat
